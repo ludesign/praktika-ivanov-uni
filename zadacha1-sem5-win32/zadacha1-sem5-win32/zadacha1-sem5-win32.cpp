@@ -7,6 +7,8 @@
 #include <windows.h>
 #include <stdlib.h> // for EXIT_ codes
 
+#include "resource.h"
+
 #define WND_CLASS_NAME		L"Zadacha1Sem5"
 #define WND_TITLE_NAME		L"Zadacha 1 - Sem 5"
 
@@ -28,7 +30,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	wcex.hIcon = 0;
 	wcex.hCursor = LoadCursorW(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;
+	wcex.lpszMenuName = MAKEINTRESOURCEW(IDM_APP_MENU);
 	wcex.lpszClassName = WND_CLASS_NAME;
 	wcex.hIconSm = 0;
 	if (!::RegisterClassExW(&wcex)) {
@@ -88,6 +90,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		case WM_PAINT:
 			hDc = ::BeginPaint(hWnd, &ps);
 			::EndPaint(hWnd, &ps);
+		break;
+
+		case WM_COMMAND:
+			if (HIWORD(wParam) == 0) { // if high word of wParam is 0, message source is MENU
+				switch (LOWORD(wParam)) {
+					case IDM_OPERATIONS_EXIT:
+						::PostMessageW(hWnd, WM_CLOSE, 0, 0);
+					break;
+				}
+			}
 		break;
 
 		case WM_DESTROY:
