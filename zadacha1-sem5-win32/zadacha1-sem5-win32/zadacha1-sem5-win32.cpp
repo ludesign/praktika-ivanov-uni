@@ -178,6 +178,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 					case IDM_OPERATIONS_EXIT:
 						::PostMessageW(hWnd, WM_CLOSE, 0, 0);
 					break;
+
+					case IDM_HELP_ABOUT:
+
+					break;
 				}
 			}
 		break;
