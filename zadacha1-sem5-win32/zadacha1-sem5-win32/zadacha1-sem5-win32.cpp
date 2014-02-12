@@ -46,7 +46,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	rect.top  = (::GetSystemMetrics(SM_CYSCREEN) - rect.bottom) / 2;
 
 	// create the window
-	HWND hWnd = ::CreateWindowExW(0L, WND_CLASS_NAME, WND_TITLE_NAME, WS_OVERLAPPEDWINDOW, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, hInstance, NULL);
+	HWND hWnd = ::CreateWindowExW(0L, WND_CLASS_NAME, WND_TITLE_NAME, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME, rect.left, rect.top, rect.right, rect.bottom, NULL, NULL, hInstance, NULL);
 	if (!hWnd) {
 		// handle error code and return failure
 		return EXIT_FAILURE;
