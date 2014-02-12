@@ -52,7 +52,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	// make sure our windows is frontmost
 	::SetWindowPos(hWnd, HWND_TOPMOST, rect.left, rect.top, rect.right, rect.bottom, SWP_SHOWWINDOW);
-	::ShowWindow(hWnd, SW_SHOW);
+	::ShowWindow(hWnd, nCmdShow);
 	::UpdateWindow(hWnd);
 
 	// handle messages loop
