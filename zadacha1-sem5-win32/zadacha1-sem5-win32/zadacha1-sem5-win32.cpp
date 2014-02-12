@@ -6,11 +6,14 @@
 
 #include <windows.h>
 #include <stdlib.h> // for EXIT_ codes
+#include <vector>
 
 #include "resource.h"
 
 #define WND_CLASS_NAME		L"Zadacha1Sem5"
 #define WND_TITLE_NAME		L"Zadacha 1 - Sem 5"
+
+std::vector<POINT> dots;
 
 // declaration of Windows Procedure callback
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -131,8 +134,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			HGDIOBJ hOriginalBrush = ::SelectObject(hDc, hStockBrush);
 			::SetDCBrushColor(hDc, RGB(255, 0, 0));
 
-			// draw a sample dot
-			::Ellipse(hDc, 10, 10, 14, 14);
+			// draw all dots from vector<dots>
+			for (std::vector<POINT>::iterator iterator = dots.begin(); iterator != dots.end(); ++iterator) {
+				// draw -2 for left and top, +4 for right and bottom
+				::Ellipse(hDc, iterator->x - 4, iterator->y - 4, iterator->x + 4, iterator->y + 4);
+			}
 
 			// select default/origin pen before deleting our custom pens
 			::SelectObject(hDc, hOriginalPen);
@@ -146,9 +152,29 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		}
 		break;
 
+		case WM_LBUTTONDOWN: {
+			POINT cursorPosition = { 0 };
+			cursorPosition.x = (LONG)LOWORD(lParam);
+			cursorPosition.y = (LONG)HIWORD(lParam);
+
+			// add current dot position to all dots vector<> as two component vector
+			dots.push_back(cursorPosition);
+		}
+		break;
+
+		case WM_LBUTTONUP:
+			// ask windows to redraw the client area
+			::RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
+		break;
+
 		case WM_COMMAND:
 			if (HIWORD(wParam) == 0) { // if high word of wParam is 0, message source is MENU
 				switch (LOWORD(wParam)) {
+					case IDM_OPERATIONS_NEW:
+						dots.clear();
+						::RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
+					break;
+
 					case IDM_OPERATIONS_EXIT:
 						::PostMessageW(hWnd, WM_CLOSE, 0, 0);
 					break;
