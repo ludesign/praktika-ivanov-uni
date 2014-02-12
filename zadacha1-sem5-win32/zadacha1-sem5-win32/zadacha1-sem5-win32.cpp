@@ -171,7 +171,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 		case WM_LBUTTONUP:
 			// ask windows to redraw the client area
-			::RedrawWindow(hWnd, NULL, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
+			if (!dots.empty()) {
+				POINT dot = dots.back();
+				RECT invalidRect = { dot.x - 4, dot.y - 4, dot.x + 4, dot.y + 4 };
+				::RedrawWindow(hWnd, &invalidRect, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
+			}
 		break;
 
 		case WM_COMMAND:
