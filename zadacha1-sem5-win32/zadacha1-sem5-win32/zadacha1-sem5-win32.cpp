@@ -15,6 +15,9 @@
 
 std::vector<POINT> dots;
 
+// show system error helper function
+void showLastErrorAsMessageBox();
+
 // declaration of Windows Procedure callback
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -38,6 +41,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	wcex.hIconSm = 0;
 	if (!::RegisterClassExW(&wcex)) {
 		// handle error code and return failure
+		showLastErrorAsMessageBox();
 		return EXIT_FAILURE;
 	}
 
@@ -51,6 +55,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	// calculate adjusted size for our window to fix the required client size + the additional elements (frame, menu, titlebar...)
 	if (!::AdjustWindowRectEx(&rect, wndStyle, TRUE, wndExStyle)) {
 		// handle error code and return failure
+		showLastErrorAsMessageBox();
+		return EXIT_FAILURE;
 	}
 
 	// query OS to get system metrics for screen sizes in order to center it
@@ -61,6 +67,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	HWND hWnd = ::CreateWindowExW(0L, WND_CLASS_NAME, WND_TITLE_NAME, wndStyle, xOffset, yOffset, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, hInstance, NULL);
 	if (!hWnd) {
 		// handle error code and return failure
+		showLastErrorAsMessageBox();
 		return EXIT_FAILURE;
 	}
 
@@ -192,4 +199,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	}
 
 	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+void showLastErrorAsMessageBox() {
+	wchar_t errorBuff[256];
+	::FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM, NULL, ::GetLastError(), 0l, errorBuff, 256, NULL);
+	::MessageBoxExW(NULL, errorBuff, L"Fatal Error", MB_OK, 0l);
 }
