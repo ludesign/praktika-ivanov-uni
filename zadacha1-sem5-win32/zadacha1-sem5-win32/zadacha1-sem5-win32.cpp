@@ -13,6 +13,15 @@
 #define WND_CLASS_NAME		L"Zadacha1Sem5"
 #define WND_TITLE_NAME		L"Zadacha 1 - Sem 5"
 
+#define DOT_RADIUS			4
+
+#define CCS_LINES_COLOR		RGB(0, 0, 0)
+#define DOT_LINES_COLOR		RGB(255, 0, 0)
+#define DOT_BKG_COLOR		RGB(255, 0, 0)
+
+#define CCS_LINES_WIDTH		2
+#define DOT_LINES_WIDTH		1
+
 std::vector<POINT> dots;
 
 // show system error helper function
@@ -117,10 +126,10 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			hDc = ::BeginPaint(hWnd, &ps);
 
 			// create pen for CCS drawing
-			hPenCoordSys = ::CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+			hPenCoordSys = ::CreatePen(PS_SOLID, CCS_LINES_WIDTH, CCS_LINES_COLOR);
 
 			// create pen for Dots drawing
-			hPenDots = ::CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
+			hPenDots = ::CreatePen(PS_SOLID, DOT_LINES_WIDTH, DOT_LINES_COLOR);
 
 			// select ccs pen and retrieve the original pen
 			HGDIOBJ hOriginalPen = ::SelectObject(hDc, hPenCoordSys);
@@ -139,12 +148,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			// retrieve stock brush, change to dot color
 			HGDIOBJ hStockBrush = ::GetStockObject(DC_BRUSH);
 			HGDIOBJ hOriginalBrush = ::SelectObject(hDc, hStockBrush);
-			::SetDCBrushColor(hDc, RGB(255, 0, 0));
+			::SetDCBrushColor(hDc, DOT_BKG_COLOR);
 
 			// draw all dots from vector<dots>
 			for (std::vector<POINT>::iterator iterator = dots.begin(); iterator != dots.end(); ++iterator) {
-				// draw -2 for left and top, +4 for right and bottom
-				::Ellipse(hDc, iterator->x - 4, iterator->y - 4, iterator->x + 4, iterator->y + 4);
+				// draw -2 for left and top, +DOT_RADIUS for right and bottom
+				::Ellipse(hDc, iterator->x - DOT_RADIUS, iterator->y - DOT_RADIUS, iterator->x + DOT_RADIUS, iterator->y + DOT_RADIUS);
 			}
 
 			// select default/origin pen before deleting our custom pens
@@ -173,7 +182,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			// ask windows to redraw the client area
 			if (!dots.empty()) {
 				POINT dot = dots.back();
-				RECT invalidRect = { dot.x - 4, dot.y - 4, dot.x + 4, dot.y + 4 };
+				RECT invalidRect = { dot.x - DOT_RADIUS, dot.y - DOT_RADIUS, dot.x + DOT_RADIUS, dot.y + DOT_RADIUS };
 				::RedrawWindow(hWnd, &invalidRect, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
 			}
 		break;
