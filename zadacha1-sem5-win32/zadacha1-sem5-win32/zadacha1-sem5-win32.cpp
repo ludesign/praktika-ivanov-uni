@@ -24,6 +24,8 @@
 
 std::vector<POINT> dots;
 
+POINT cursorPositionTracked = { 0 };
+
 // show system error helper function
 void showLastErrorAsMessageBox();
 
@@ -162,6 +164,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			// select default/origin pen before deleting our custom pens
 			::SelectObject(hDc, hOriginalPen);
 			::SelectObject(hDc, hOriginalBrush);
+
+			// draw text for coordinates
+			if (cursorPositionTracked.x > 0 && cursorPositionTracked.y > 0) {
+				RECT invalidRect = { 0, 0, 100, 20 };
+				wchar_t coords[256];
+				wsprintf(coords, L"X: %d, Y: %d", cursorPositionTracked.x, cursorPositionTracked.y);
+				::DrawTextW(hDc, coords, -1, &invalidRect, DT_SINGLELINE | DT_NOCLIP);
+			}
 			
 			// end painting and clean up pens
 			::DeleteObject(hStockBrush);
@@ -188,6 +198,19 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				RECT invalidRect = { dot.x - DOT_RADIUS, dot.y - DOT_RADIUS, dot.x + DOT_RADIUS, dot.y + DOT_RADIUS };
 				::RedrawWindow(hWnd, &invalidRect, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
 			}
+		break;
+
+		case WM_MOUSEMOVE: {
+			if (wParam & MK_SHIFT) {
+				cursorPositionTracked.x = (LONG) LOWORD(lParam);
+				cursorPositionTracked.y = (LONG) HIWORD(lParam);
+			} else {
+				cursorPositionTracked = { 0 };
+			}
+
+			RECT invalidRect = { 0, 0, 100, 20 };
+			::RedrawWindow(hWnd, &invalidRect, NULL, RDW_ERASE | RDW_INTERNALPAINT | RDW_INVALIDATE);
+		}
 		break;
 
 		case WM_COMMAND:
