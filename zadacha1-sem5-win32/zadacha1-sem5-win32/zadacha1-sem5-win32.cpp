@@ -27,8 +27,11 @@ std::vector<POINT> dots;
 // show system error helper function
 void showLastErrorAsMessageBox();
 
+// delare procedure callback for dialogs
+BOOL CALLBACK AboutDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 // declaration of Windows Procedure callback
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -199,8 +202,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 						::PostMessageW(hWnd, WM_CLOSE, 0, 0);
 					break;
 
-					case IDM_HELP_ABOUT:
-
+					case IDM_HELP_ABOUT: {
+						::DialogBox(::GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hWnd, AboutDialogProc);
+					}
 					break;
 				}
 			}
@@ -212,6 +216,33 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	}
 
 	return ::DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+BOOL CALLBACK AboutDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	switch (uMsg) {
+		case WM_INITDIALOG:
+			return TRUE;
+		break;
+
+		case WM_COMMAND: {
+			switch (LOWORD(wParam)) {
+				case IDOK:
+					::EndDialog(hWnd, IDOK);
+				break;
+			}
+		}
+		break;
+
+		case WM_CLOSE:
+			::EndDialog(hWnd, IDOK);
+		break;
+
+		default:
+			return FALSE;
+		break;
+	}
+
+	return TRUE;
 }
 
 void showLastErrorAsMessageBox() {
