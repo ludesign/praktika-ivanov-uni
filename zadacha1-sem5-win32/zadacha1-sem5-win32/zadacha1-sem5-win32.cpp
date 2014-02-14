@@ -164,13 +164,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			// draw all dots from vector<dots>
 			for (std::vector<POINT>::iterator iterator = dots.begin(); iterator != dots.end(); ++iterator) {
 				// draw text for coordinates
-				if (cursorPositionTracked.x > 0 && cursorPositionTracked.y > 0 && cursorPositionTracked.x == iterator->x && cursorPositionTracked.y == iterator->y) {
+				if (cursorPositionTracked.x > 0 && cursorPositionTracked.y > 0 && 
+					(cursorPositionTracked.x > iterator->x - DOT_RADIUS && cursorPositionTracked.x < iterator->x + DOT_RADIUS) &&
+					(cursorPositionTracked.y > iterator->y - DOT_RADIUS && cursorPositionTracked.y < iterator->y + DOT_RADIUS)) {
 					RECT invalidRect = { 0, 0, 100, 20 };
 					wchar_t coords[256];
 					// calculate dot position according to coord sys
 					POINT coordPos = { 0 };
-					coordPos.x = cursorPositionTracked.x - (clientRect.right / 2);
-					coordPos.y = (cursorPositionTracked.y - (clientRect.bottom / 2)) * -1;
+					coordPos.x = iterator->x - (clientRect.right / 2);
+					coordPos.y = (iterator->y - (clientRect.bottom / 2)) * -1;
 					wsprintf(coords, L"X: %d, Y: %d", coordPos.x, coordPos.y);
 					::DrawTextW(hDc, coords, -1, &invalidRect, DT_SINGLELINE | DT_NOCLIP);
 				}
