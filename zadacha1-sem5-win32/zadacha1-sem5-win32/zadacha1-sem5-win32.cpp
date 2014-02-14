@@ -18,6 +18,8 @@
 #define CCS_LINES_COLOR		RGB(0, 0, 0)
 #define DOT_LINES_COLOR		RGB(255, 0, 0)
 #define DOT_BKG_COLOR		RGB(255, 0, 0)
+#define DOT_LINES_SEL_COLOR RGB(0, 255, 0)
+#define DOT_BKG_SEL_COLOR	RGB(0, 255, 0)
 
 #define CCS_LINES_WIDTH		2
 #define DOT_LINES_WIDTH		1
@@ -111,6 +113,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 	HDC hDc = { };
 	HPEN hPenCoordSys = { };
 	HPEN hPenDots = {};
+	HPEN hPenSelDots = {};
 	RECT clientRect = { 0 };
 
 	// Check any available messages from the queue
@@ -136,6 +139,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			// create pen for Dots drawing
 			hPenDots = ::CreatePen(PS_SOLID, DOT_LINES_WIDTH, DOT_LINES_COLOR);
 
+			// create pen for selected Dots drawing
+			hPenSelDots = ::CreatePen(PS_SOLID, DOT_LINES_WIDTH, DOT_LINES_SEL_COLOR);
+
 			// select ccs pen and retrieve the original pen
 			HGDIOBJ hOriginalPen = ::SelectObject(hDc, hPenCoordSys);
 
@@ -157,6 +163,18 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 			// draw all dots from vector<dots>
 			for (std::vector<POINT>::iterator iterator = dots.begin(); iterator != dots.end(); ++iterator) {
+				// draw text for coordinates
+				if (cursorPositionTracked.x > 0 && cursorPositionTracked.y > 0 && cursorPositionTracked.x == iterator->x && cursorPositionTracked.y == iterator->y) {
+					RECT invalidRect = { 0, 0, 100, 20 };
+					wchar_t coords[256];
+					// calculate dot position according to coord sys
+					POINT coordPos = { 0 };
+					coordPos.x = cursorPositionTracked.x - (clientRect.right / 2);
+					coordPos.y = (cursorPositionTracked.y - (clientRect.bottom / 2)) * -1;
+					wsprintf(coords, L"X: %d, Y: %d", coordPos.x, coordPos.y);
+					::DrawTextW(hDc, coords, -1, &invalidRect, DT_SINGLELINE | DT_NOCLIP);
+				}
+				
 				// draw -2 for left and top, +DOT_RADIUS for right and bottom
 				::Ellipse(hDc, iterator->x - DOT_RADIUS, iterator->y - DOT_RADIUS, iterator->x + DOT_RADIUS, iterator->y + DOT_RADIUS);
 			}
@@ -164,14 +182,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			// select default/origin pen before deleting our custom pens
 			::SelectObject(hDc, hOriginalPen);
 			::SelectObject(hDc, hOriginalBrush);
-
-			// draw text for coordinates
-			if (cursorPositionTracked.x > 0 && cursorPositionTracked.y > 0) {
-				RECT invalidRect = { 0, 0, 100, 20 };
-				wchar_t coords[256];
-				wsprintf(coords, L"X: %d, Y: %d", cursorPositionTracked.x, cursorPositionTracked.y);
-				::DrawTextW(hDc, coords, -1, &invalidRect, DT_SINGLELINE | DT_NOCLIP);
-			}
 			
 			// end painting and clean up pens
 			::DeleteObject(hStockBrush);
@@ -202,8 +212,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 		case WM_MOUSEMOVE: {
 			if (wParam & MK_SHIFT) {
-				cursorPositionTracked.x = (LONG) LOWORD(lParam);
-				cursorPositionTracked.y = (LONG) HIWORD(lParam);
+				cursorPositionTracked.x = (LONG)LOWORD(lParam);
+				cursorPositionTracked.y = (LONG)HIWORD(lParam);
 			} else {
 				cursorPositionTracked = { 0 };
 			}
